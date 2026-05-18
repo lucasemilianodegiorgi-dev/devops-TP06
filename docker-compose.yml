@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: postgres
 
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
     networks:
       - app-network
@@ -56,6 +56,8 @@ services:
     expose:
       - "5000"
 
+    ports:
+      - "5000:5000"
   frontend:
 
     build:
@@ -74,10 +76,38 @@ services:
     networks:
       - app-network
 
-networks:
-  app-network:
-    driver: bridge
+  prometheus:
+    image: prom/prometheus
+    container_name: notes-prometheus
+
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+    ports:
+      - "9090:9090"
+
+    depends_on:
+      - backend
+
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana
+    container_name: notes-grafana
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - prometheus
+
+    networks:
+      - app-network
+
 
 volumes:
-  postgres-data:
-    driver: local
+  postgres_data:
+
+networks:
+  app-network:

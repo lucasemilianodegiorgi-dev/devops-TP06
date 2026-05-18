@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from prometheus_flask_exporter import PrometheusMetrics
 import psycopg2, os, datetime
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 CORS(app)
 
 def get_conn():
