@@ -74,25 +74,41 @@ def get_notes():
 
 @app.route("/api/notes", methods=["POST"])
 def create_note():
+
     data = request.get_json()
 
+    if not data or "title" not in data:
+        return jsonify({
+            "error": "title es obligatorio"
+        }), 400
+
     conn = get_conn()
+
     cur = conn.cursor()
 
     cur.execute(
-        "INSERT INTO notes (title, content) VALUES (%s, %s) RETURNING id",
-        (data["title"], data.get("content", ""))
+        """
+        INSERT INTO notes (title, content)
+        VALUES (%s, %s)
+        RETURNING id
+        """,
+        (
+            data["title"],
+            data.get("content", "")
+        )
     )
 
     note_id = cur.fetchone()[0]
 
     conn.commit()
+
     cur.close()
+
     conn.close()
 
     return jsonify({
         "id": note_id,
-        "message": "nota creada"
+        "message": "Nota creada"
     }), 201
 
 @app.route("/api/notes/<int:note_id>", methods=["DELETE"])
